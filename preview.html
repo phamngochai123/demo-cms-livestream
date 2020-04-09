@@ -34,7 +34,7 @@
     return result;
   };
   function onLoad() {
-    $.get('http://192.168.3.130:6001/demo').done((res) => {
+    $.get('http://localhost:6001/demo').done((res) => {
       // console.log(res);
       if (res.elString !== lastEl) {
         lastEl = res.elString;
@@ -43,7 +43,7 @@
         // el.innerHTML = res.elString;
       }
     })
-    $.get('http://192.168.3.130:6001/demo-obj').done((res) => {
+    $.get('http://localhost:6001/demo-obj').done((res) => {
       console.log(res);
       const elObject = res.elObj;
       Object.keys(lastElObj).map((key) => {
@@ -155,7 +155,7 @@
     }, 1000);
   }
   function getScript() {
-    $.get('http://192.168.3.130:6001/demo-sendScript').done((res) => {
+    $.get('http://localhost:6001/demo-sendScript').done((res) => {
       // console.log(res);
       // document.write(res);
       let node = document.createElement('script');
@@ -171,7 +171,7 @@
     }
     document.getElementById(id).style.display = 'none';
   }
-  getScript();
+  // getScript();
   onLoad();
   setInterval(() => {
     onLoad();

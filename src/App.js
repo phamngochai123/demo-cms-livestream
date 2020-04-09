@@ -78,8 +78,8 @@ export default class App extends Component {
     })
     const el = document.getElementById('page-demo');
     // console.log(this.getTxtHtml(el));
-    axios.post('http://192.168.3.130:6001/demo', { elString: this.getTxtHtml(el) });
-    axios.post('http://192.168.3.130:6001/demo-obj', { elObj: layerSend });
+    axios.post('http://localhost:6001/demo', { elString: this.getTxtHtml(el) });
+    axios.post('http://localhost:6001/demo-obj', { elObj: layerSend });
   }
   getTxtHtml = (who, deep = true) => {
     if (!who || !who.tagName) return '';
