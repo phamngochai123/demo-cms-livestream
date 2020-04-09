@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <title>Preview</title>
+</head>
+
+<body>
+  <div onload="onLoadCountdown()" id="app"></div>
+</body>
+<script>
+  let lastEl = '', objTimeCountdown = {}, lastElObj = [];
+  const convertSeconds = sec => {
+    const hrs = Math.floor(sec / 3600);
+    const min = Math.floor((sec - hrs * 3600) / 60);
+    let seconds = sec - hrs * 3600 - min * 60;
+    seconds = Math.round(seconds * 100) / 100;
+    if (hrs < 1) {
+      let result = min < 10 ? '0' + min : min;
+      result += ':' + (seconds < 10 ? '0' + seconds : seconds);
+      return result;
+    }
+    let result = hrs < 10 ? '0' + hrs : hrs;
+    // let result = (min < 10 ? "0" + min : min);
+    result +=
+      ':' +
+      (min < 10 ? '0' + min : min) +
+      ':' +
+      (seconds < 10 ? '0' + seconds : seconds);
+    return result;
+  };
+  function onLoad() {
+    $.get('http://192.168.3.130:6001/demo').done((res) => {
+      // console.log(res);
+      if (res.elString !== lastEl) {
+        lastEl = res.elString;
+        let el = document.getElementById('app');
+        let a = new DOMParser().parseFromString(res.elString, 'text/html').body;
+        // el.innerHTML = res.elString;
+      }
+    })
+    $.get('http://192.168.3.130:6001/demo-obj').done((res) => {
+      console.log(res);
+      const elObject = res.elObj;
+      Object.keys(lastElObj).map((key) => {
+        if (!elObject[key] && document.getElementById('layer-item-' + key)) {
+          document.getElementById('layer-item-' + key).remove();
+        }
+      })
+      lastElObj = { ...elObject };
+      let elApp = document.getElementById('app');
+      Object.keys(elObject).map((key) => {
+        let layerItem;
+        const typeLayer = elObject[key].type;
+        const styleLayer = elObject[key].style;
+        const configLayer = elObject[key].config;
+        let { time, start, question } = configLayer;
+        switch (typeLayer) {
+          case 'text':
+            layerItem = document.getElementById('layer-item-' + key);
+            if (!layerItem) {
+              let textLayerNode = document.createElement('div');
+              textLayerNode.id = 'layer-item-' + key;
+              Object.keys(styleLayer).map(key => {
+                textLayerNode.style[key] = styleLayer[key];
+              })
+              textLayerNode.innerText = styleLayer.text;
+              elApp.appendChild(textLayerNode);
+            } else {
+              Object.keys(styleLayer).map(key => {
+                layerItem.style[key] = styleLayer[key];
+              })
+            }
+            break;
+          case 'countdown':
+            layerItem = document.getElementById('layer-item-' + key);
+            if (!layerItem) {
+              let textLayerNode = document.createElement('div');
+              textLayerNode.id = 'layer-item-' + key;
+              textLayerNode.setAttribute('data-type', 'countdown');
+              textLayerNode.setAttribute('data-time', time.toString());
+              textLayerNode.setAttribute('data-start', start.toString());
+              Object.keys(styleLayer).map(key => {
+                textLayerNode.style[key] = styleLayer[key];
+              })
+              textLayerNode.style.fontSize = '30px';
+              textLayerNode.style.textAlign = 'center';
+              let timeShow = time - (Math.floor((new Date().valueOf() - start) / 1000));
+              objTimeCountdown[key] = timeShow;
+              textLayerNode.innerText = convertSeconds(Math.max(timeShow, 0));
+              elApp.appendChild(textLayerNode);
+              // setInterval(() => {
+              //   const textTime = textLayerNode.textContent;
+              //   textLayerNode.innerText = convertSeconds(Math.max((objTimeCountdown[key] - 1), 0));
+              //   objTimeCountdown[key] = objTimeCountdown[key] - 1;
+              // }, 1000)
+            } else {
+              Object.keys(styleLayer).map(key => {
+                layerItem.style[key] = styleLayer[key];
+              })
+            }
+            break;
+          case 'yesnoQuestion':
+            layerItem = document.getElementById('layer-item-' + key);
+            if (!layerItem) {
+              let elmentString = `<div id="layer-item-${key}">
+                <div>${question}</div>
+                <div>
+                  <button onclick="onAnswer(1, 'layer-item-${key}')">Có</button>
+                  <button onclick="onAnswer(0, 'layer-item-${key}')">Không</button>
+                </div>
+              </div>`;
+              let doc = new DOMParser().parseFromString(elmentString, "text/html").body.firstChild;
+              let textLayerNode = document.createElement('div');
+              textLayerNode.id = 'layer-item-' + key;
+              Object.keys(styleLayer).map(key => {
+                textLayerNode.style[key] = styleLayer[key];
+                doc.style[key] = styleLayer[key];
+              })
+              textLayerNode.innerText = question;
+              elApp.appendChild(doc);
+            } else {
+              if (layerItem.style) {
+                Object.keys(styleLayer).map(key => {
+                  layerItem.style[key] = styleLayer[key];
+                })
+              }
+            }
+            break;
+          default: break;
+        }
+      })
+    })
+  }
+  function testClick() {
+    console.log('testClick');
+  }
+  function runCountDown() {
+    let arrEl = document.querySelectorAll('[data-type~="countdown"]');
+    arrEl.forEach(el => {
+      let time = parseInt(el.getAttribute('data-time'));
+      let start = parseInt(el.getAttribute('data-start'));
+      // console.log(time, start);
+      let timeShow = Math.max(time - (Math.floor((new Date().valueOf() - start) / 1000)), 0);
+      el.textContent = convertSeconds(timeShow);
+    })
+  }
+  function onLoadCountdown() {
+    setInterval(() => {
+      runCountDown();
+    }, 1000);
+  }
+  function getScript() {
+    $.get('http://192.168.3.130:6001/demo-sendScript').done((res) => {
+      // console.log(res);
+      // document.write(res);
+      let node = document.createElement('script');
+      node.textContent = res;
+      document.getElementsByTagName('body')[0].appendChild(node);
+    })
+  }
+  function onAnswer(question, id) {
+    if(question) {
+      alert('Có.');
+    } else {
+      alert('Không.');
+    }
+    document.getElementById(id).style.display = 'none';
+  }
+  getScript();
+  onLoad();
+  setInterval(() => {
+    onLoad();
+  }, 1000)
+</script>
+
+</html>
