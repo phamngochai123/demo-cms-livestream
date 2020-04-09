@@ -93,11 +93,11 @@
               objTimeCountdown[key] = timeShow;
               textLayerNode.innerText = convertSeconds(Math.max(timeShow, 0));
               elApp.appendChild(textLayerNode);
-              // setInterval(() => {
-              //   const textTime = textLayerNode.textContent;
-              //   textLayerNode.innerText = convertSeconds(Math.max((objTimeCountdown[key] - 1), 0));
-              //   objTimeCountdown[key] = objTimeCountdown[key] - 1;
-              // }, 1000)
+              setInterval(() => {
+                const textTime = textLayerNode.textContent;
+                textLayerNode.innerText = convertSeconds(Math.max((objTimeCountdown[key] - 1), 0));
+                objTimeCountdown[key] = objTimeCountdown[key] - 1;
+              }, 1000)
             } else {
               Object.keys(styleLayer).map(key => {
                 layerItem.style[key] = styleLayer[key];
