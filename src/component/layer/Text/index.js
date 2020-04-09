@@ -15,13 +15,13 @@ export default class TextLayer extends Component {
   }
   render() {
     // const { width, height, x, y } = this.state;
-    const {id, position, setPosition, deleteLayer, text} = this.props;
+    const {id, position, setPosition, deleteLayer, text, prefixId} = this.props;
     const {width, height, x, y} = position;
     return (
-      <div id={'text-layer-' + id}>
+      <div id={prefixId + id}>
       <Rnd
         className="test"
-        style={{ border: 'solid 1px #ddd', backgroundColor: '#ccc' }}
+        style={{ border: 'solid 1px #ddd', backgroundColor: '#ccc', textAlign: 'center' }}
         size={{
           width: width,
           height: height,

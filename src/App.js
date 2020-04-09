@@ -7,6 +7,13 @@ import logo from './logo.svg';
 import './App.css';
 import TextLayer from './component/layer/Text';
 import CountdownLayer from './component/layer/Countdown';
+import YesNoQuestionLayer from './component/layer/Question/YesNo';
+
+const configLayer = {
+  text: { type: 'text', prefixId: 'text-layer-' },
+  countdown: { type: 'countdown', prefixId: 'countdown-layer-' },
+  yesnoQuestion: { type: 'yesnoQuestion', prefixId: 'yesno-layer-' }
+}
 
 export default class App extends Component {
   constructor(props) {
@@ -56,6 +63,7 @@ export default class App extends Component {
         position: firstChild.style.position,
         backgroundColor: firstChild.style.backgroundColor,
         border: firstChild.style.border,
+        textAlign: firstChild.style.textAlign,
         text: layer.text || firstChild.textContent
       }
       layerSend[layer.id] = {
@@ -63,7 +71,8 @@ export default class App extends Component {
         style: styleElement,
         config: {
           time: layer.time,
-          start: layer.start
+          start: layer.start,
+          question: layer.question
         }
       };
     })
@@ -94,61 +103,84 @@ export default class App extends Component {
     })
   }
   setPosition = (id, params) => {
-    let {layers} = this.state;
+    let { layers } = this.state;
     layers[layers.findIndex((a) => a.id === id)].position = {
       ...layers[layers.findIndex((a) => a.id === id)].position,
       ...params
     }
     this.setState(layers);
   }
+  createLayer = (type) => {
+    const { layers } = this.state;
+    let tmpLayer = [...layers];
+    switch (type) {
+      case configLayer.text.type:
+        tmpLayer.push({
+          key: configLayer.text.prefixId,
+          prefixId: configLayer.text.prefixId,
+          type,
+          text: 'Text Layers ' + tmpLayer.filter((r) => r.type === 'text').length,
+          id: Math.random().toString(36).slice(-8),
+          component: TextLayer,
+          position: {
+            width: 200,
+            height: 100,
+            x: 0,
+            y: 0,
+          }
+        })
+        break;
+      case configLayer.countdown.type:
+        tmpLayer.push({
+          key: configLayer.countdown.prefixId,
+          prefixId: configLayer.countdown.prefixId,
+          type,
+          id: Math.random().toString(36).slice(-8),
+          component: CountdownLayer,
+          time: 300,
+          start: new Date().valueOf(),
+          position: {
+            width: 200,
+            height: 100,
+            x: 0,
+            y: 0,
+          }
+        })
+        break;
+      case configLayer.yesnoQuestion.type:
+        tmpLayer.push({
+          key: configLayer.yesnoQuestion.prefixId,
+          prefixId: configLayer.yesnoQuestion.prefixId,
+          question: 'Bạn có thích stream này không?',
+          type,
+          id: Math.random().toString(36).slice(-8),
+          component: YesNoQuestionLayer,
+          position: {
+            width: 300,
+            height: 100,
+            x: 0,
+            y: 0,
+          }
+        })
+        break;
+      default: break;
+    }
+    this.setState({
+      layers: tmpLayer
+    })
+  }
   render() {
     const { layers } = this.state;
     return (
       <div id='app' className="App">
         {/* <div style={{width: 100, height: 100, backgroundColor: 'red'}} id={"test"}>1234</div> */}
-        <button onClick={() => {
-          let tmpLayer = [...layers];
-          tmpLayer.push({
-            key: 'text-layer-',
-            type: 'text',
-            text: 'Text Layers ' + tmpLayer.filter((r) => r.type === 'text').length,
-            id: Math.random().toString(36).slice(-8),
-            component: TextLayer,
-            position: {
-              width: 200,
-              height: 100,
-              x: 0,
-              y: 0,
-            }
-          })
-          this.setState({
-            layers: tmpLayer
-          })
-        }}>Add TextLayer</button>
-        <button onClick={() => {
-          let tmpLayer = [...layers];
-          tmpLayer.push({
-            key: 'countdown-layer-',
-            type: 'countdown',
-            id: Math.random().toString(36).slice(-8),
-            component: CountdownLayer,
-            time: 300,
-            start: new Date().valueOf(),
-            position: {
-              width: 200,
-              height: 100,
-              x: 0,
-              y: 0,
-            }
-          })
-          this.setState({
-            layers: tmpLayer
-          })
-        }}>Add CountdownLayer</button>
+        <button onClick={() => { this.createLayer(configLayer.text.type) }}>Add TextLayer</button>
+        <button onClick={() => { this.createLayer(configLayer.countdown.type) }}>Add CountdownLayer</button>
+        <button onClick={() => { this.createLayer(configLayer.yesnoQuestion.type) }}>Add Question</button>
         <div id='page-demo' className='screen-demo'>
           {
             layers.map((layer, index) => {
-              return <layer.component text={layer.text} position={layer.position} setPosition={(id, params) => this.setPosition(id, params)} index={index} deleteLayer={(id) => this.deleteLayer(id)} time={layer.time} start={layer.start} id={layer.id} key={index} />
+              return <layer.component question={layer.question} prefixId={layer.prefixId} text={layer.text} position={layer.position} setPosition={(id, params) => this.setPosition(id, params)} index={index} deleteLayer={(id) => this.deleteLayer(id)} time={layer.time} start={layer.start} id={layer.id} key={index} />
             })
           }
         </div>

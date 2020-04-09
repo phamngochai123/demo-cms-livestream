@@ -55,13 +55,13 @@ convertSeconds = sec => {
   render() {
     // console.log('---state---', this.state);
     const { time } = this.state;
-    const {id, deleteLayer, position, setPosition} = this.props;
+    const {id, deleteLayer, position, setPosition, prefixId} = this.props;
     const {x, y, width, height} = position;
     return (
-      <div id={'countdown-layer-' + id}>
+      <div id={prefixId + id}>
       <Rnd
         className="test"
-        style={{ border: 'solid 1px #ddd', backgroundColor: '#ccc' }}
+        style={{ border: 'solid 1px #ddd', backgroundColor: '#ccc', textAlign: 'center' }}
         size={{
           width: width,
           height: height,
